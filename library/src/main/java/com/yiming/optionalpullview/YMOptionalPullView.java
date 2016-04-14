@@ -9,6 +9,7 @@ import android.graphics.drawable.AnimationDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -197,19 +198,20 @@ public class YMOptionalPullView extends LinearLayout {
 
         @Override
         public void addCustomViewToTopView(LinearLayout topView) {
+            float density = getResources().getDisplayMetrics().density;
             LinearLayout content = new LinearLayout(getContext());
             content.setGravity(Gravity.CENTER);
-            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 100);
+            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
             ImageView iv = new ImageView(getContext());
             iv.setImageResource(R.drawable.loading_anim1);
-            content.addView(iv);
+            content.addView(iv, (int)(density * 40), (int)(density * 40));
             topIv = iv;
             TextView tv = new TextView(getContext());
             tv.setText(topLoadingText);
             tv.setEms(6);
             tv.setTextColor(Color.DKGRAY);
-            tv.setTextSize(14);
-            tv.setPadding((int) (getResources().getDisplayMetrics().density * 5), 0, 0, 0);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            tv.setPadding((int) (density * 5), 0, 0, 0);
             tv.setGravity(Gravity.CENTER);
             content.addView(tv);
             topTv = tv;
@@ -220,19 +222,20 @@ public class YMOptionalPullView extends LinearLayout {
 
         @Override
         public void addCustomViewToBottomView(LinearLayout bottomView) {
+            float density = getResources().getDisplayMetrics().density;
             LinearLayout content = new LinearLayout(getContext());
             content.setGravity(Gravity.CENTER);
-            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 100);
+            LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
             ImageView iv = new ImageView(getContext());
             iv.setImageResource(R.drawable.loading_anim1);
-            content.addView(iv);
+            content.addView(iv, (int)(density * 40), (int)(density * 40));
             bottomIv = iv;
             TextView tv = new TextView(getContext());
             tv.setText(bottomLoadingText);
             tv.setEms(6);
             tv.setTextColor(Color.DKGRAY);
-            tv.setTextSize(14);
-            tv.setPadding((int) (getResources().getDisplayMetrics().density * 5), 0, 0, 0);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            tv.setPadding((int) (density * 5), 0, 0, 0);
             tv.setGravity(Gravity.CENTER);
             content.addView(tv);
             bottomTv = tv;
