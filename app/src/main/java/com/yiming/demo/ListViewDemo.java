@@ -22,13 +22,16 @@ public class ListViewDemo extends AppCompatActivity implements YMOptionalPullVie
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_listview);
+        initListView();
+        initYMOptionalPullView();
+    }
+
+    private void initListView() {
         listView = (ListView) findViewById(R.id.listview);
         String[] arr = new String[20];
         for (int i=0; i<arr.length; i++) arr[i] = "item " + (i+1);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr);
         listView.setAdapter(adapter);
-
-        initYMOptionalPullView();
     }
 
     private void initYMOptionalPullView() {
