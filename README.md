@@ -1,2 +1,2 @@
 # android-YMOptionalPullView
-Android下拉刷新库
+Android下拉刷新库,简单易用，支持ScrollViw、ListView、GridView、RecyclerView

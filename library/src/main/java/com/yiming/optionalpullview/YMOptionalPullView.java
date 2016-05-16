@@ -165,7 +165,7 @@ public class YMOptionalPullView extends LinearLayout {
         boolean isMostBottom(View contentView);
     }
 
-/********************以下是再带的加载样式*************************************************************/
+/********************以下是自带的加载样式*************************************************************/
 
     private TextView topTv;
     private ImageView topIv;
@@ -218,6 +218,7 @@ public class YMOptionalPullView extends LinearLayout {
             topView.addView(content, layoutParams);
 //            topView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             topView.setGravity(Gravity.CENTER);
+            topView.setBackgroundColor(0xffcccccc);
         }
 
         @Override
@@ -242,6 +243,7 @@ public class YMOptionalPullView extends LinearLayout {
             bottomView.addView(content, layoutParams);
 //            bottomView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             bottomView.setGravity(Gravity.CENTER);
+            bottomView.setBackgroundColor(0xffcccccc);
         }
 
         @Override
@@ -422,7 +424,7 @@ public class YMOptionalPullView extends LinearLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d(debug_tag, "onInterceptTouchEvent(Down) y=" + ev.getY());
+//                Log.d(debug_tag, "onInterceptTouchEvent(Down) y=" + ev.getY());
                 if(mTopView.getHeight() > 0 || mBottomView.getHeight() > 0) {
                     return super.onInterceptTouchEvent(ev);
                 }
@@ -437,13 +439,13 @@ public class YMOptionalPullView extends LinearLayout {
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                Log.d(debug_tag, "onInterceptTouchEvent(Up) y=" + ev.getY());
+//                Log.d(debug_tag, "onInterceptTouchEvent(Up) y=" + ev.getY());
                 isMostBottom = false;
                 isMostTop = false;
                 overflowYIncrement = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d(debug_tag, "onInterceptTouchEvent(Move) y=" + ev.getY());
+//                Log.d(debug_tag, "onInterceptTouchEvent(Move) y=" + ev.getY());
                 if(isMostTop && (mMode == Mode.BOTH_PULL || mMode == Mode.DOWN_PULL)) {
                     overflowY = ev.getY() - lastDownActionY;
                     if(overflowY > mTouchSlop) {
@@ -537,6 +539,9 @@ public class YMOptionalPullView extends LinearLayout {
             if(mContentView instanceof RecyclerView) {//兼容
                 RecyclerView rv = (RecyclerView) mContentView;
                 rv.scrollBy(0, (int) height);
+            } else if(mContentView instanceof ScrollView) {
+                ScrollView sv = (ScrollView) mContentView;
+                sv.fullScroll(ScrollView.FOCUS_DOWN);
             } else {
                 mContentView.scrollTo(0, params.height);
             }
@@ -607,11 +612,11 @@ public class YMOptionalPullView extends LinearLayout {
             mContentViewLocator = new RecyclerViewLocator();
             return true;
         } else if(contentView instanceof GridView) {
-//            mContentViewLocator = new GridViewLocator();
-//            return true;
+            mContentViewLocator = new GridViewLocator();
+            return true;
         } else if(contentView instanceof ScrollView) {
-//            mContentViewLocator = new ScrollViewLocator();
-//            return true;
+            mContentViewLocator = new ScrollViewLocator();
+            return true;
         }
 
         return false;
@@ -690,11 +695,31 @@ public class YMOptionalPullView extends LinearLayout {
 
         @Override
         public boolean isMostTop(View contentView) {
+            GridView gv = (GridView) contentView;
+            int firstVisiblePosition = gv.getFirstVisiblePosition();
+            int firstChildViewTop = gv.getChildAt(0).getTop();
+            int lvPaddingTop = gv.getPaddingTop();
+//            Log.d(debug_tag, "firstVisiblePosition=" + firstVisiblePosition
+//                    + ", firstChildViewTop=" + firstChildViewTop + ", lvPaddingTop=" + lvPaddingTop);
+            if(firstVisiblePosition == 0 && firstChildViewTop - lvPaddingTop == 0) {
+                Log.d(debug_tag, "GridView isMostTop!");
+                return true;
+            }
             return false;
         }
 
         @Override
         public boolean isMostBottom(View contentView) {
+            GridView gv = (GridView)contentView;
+            int lastVisiblePosition = gv.getLastVisiblePosition();
+            int lastChildViewBottom = gv.getChildAt(gv.getChildCount()-1).getBottom();
+            int lvPaddingBottom = gv.getPaddingBottom();
+//            Log.d(debug_tag, "lastVisiblePosition=" + lastVisiblePosition + ", lv.getCount()=" + lv.getCount()
+//                    + ", lastChildViewBottom=" + lastChildViewBottom + ", lvPaddingBottom=" + lvPaddingBottom + ", h=" + lv.getHeight());
+            if(lastVisiblePosition == gv.getCount()-1 && lastChildViewBottom + lvPaddingBottom == gv.getHeight()) {
+                Log.d(debug_tag, "GridView isMostBottom!");
+                return true;
+            }
             return false;
         }
     }
@@ -703,11 +728,24 @@ public class YMOptionalPullView extends LinearLayout {
 
         @Override
         public boolean isMostTop(View contentView) {
+            ScrollView sv = (ScrollView)contentView;
+            if(sv.getScrollY() == 0) {
+                return true;
+            }
             return false;
         }
 
         @Override
         public boolean isMostBottom(View contentView) {
+            ScrollView sv = (ScrollView)contentView;
+            View childView = sv.getChildAt(0);
+            if(childView.getMeasuredHeight() + sv.getPaddingBottom() == sv.getScrollY() + sv.getMeasuredHeight()) {
+                return true;
+            }
+//            Log.d(debug_tag, "getY=" + sv.getY() + ", getScrollY=" + sv.getScrollY());
+//            Log.d(debug_tag, "h=" + sv.getHeight() + ", measuredH=" + sv.getMeasuredHeight());
+//            Log.d(debug_tag, "child mh=" + childView.getMeasuredHeight() + ", child H=" + childView.getHeight());
+
             return false;
         }
     }
