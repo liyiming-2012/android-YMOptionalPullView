@@ -1,6 +1,7 @@
 package com.yiming.demo;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
@@ -44,7 +45,12 @@ public class GridViewDemo extends AppCompatActivity implements YMOptionalPullVie
     }
 
     @Override
-    public void onLoad(YMOptionalPullView opv, boolean isDownPull) {
-
+    public void onLoad(final YMOptionalPullView opv, boolean isDownPull) {
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                opv.notifyLoadComplete(true);
+            }
+        }, 1500);
     }
 }
