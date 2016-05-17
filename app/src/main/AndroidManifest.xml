@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yiming.demo" >
+    package="com.yiming.demo">
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme" >
-        <activity android:name="com.yiming.demo.MainActivity"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".MainActivity"
             android:label="YMOptionalPullViewDemo">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -16,14 +17,21 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.yiming.demo.ListViewDemo"
-            android:label="ListViewDemo"/>
-        <activity android:name="com.yiming.demo.RecyclerViewDemo"
-            android:label="RecyclerView"/>
-        <activity android:name="com.yiming.demo.GridViewDemo"
-            android:label="GridViewDemo"/>
-        <activity android:name="com.yiming.demo.ScrollViewDemo"
-            android:label="ScrollViewDemo"/>
+        <activity
+            android:name=".ListViewDemo"
+            android:label="ListViewDemo" />
+        <activity
+            android:name=".RecyclerViewDemo"
+            android:label="RecyclerView" />
+        <activity
+            android:name=".GridViewDemo"
+            android:label="GridViewDemo" />
+        <activity
+            android:name=".ScrollViewDemo"
+            android:label="ScrollViewDemo" />
+        <activity
+            android:name=".NonScrollViewDemo"
+            android:label="NonScrollViewDemo"/>
     </application>
 
 </manifest>
