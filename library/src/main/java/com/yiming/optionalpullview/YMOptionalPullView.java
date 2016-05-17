@@ -682,7 +682,7 @@ public class YMOptionalPullView extends LinearLayout {
             int lvPaddingBottom = lv.getPaddingBottom();
 //            Log.d(debug_tag, "lastVisiblePosition=" + lastVisiblePosition + ", lv.getCount()=" + lv.getCount()
 //                    + ", lastChildViewBottom=" + lastChildViewBottom + ", lvPaddingBottom=" + lvPaddingBottom + ", h=" + lv.getHeight());
-            if(lastVisiblePosition == lv.getCount()-1 && lastChildViewBottom + lvPaddingBottom == lv.getHeight()) {
+            if(lastVisiblePosition == lv.getCount()-1 && lastChildViewBottom + lvPaddingBottom <= lv.getHeight()) {
                 Log.d(debug_tag, "ListView isMostBottom!");
                 return true;
             }
@@ -749,7 +749,7 @@ public class YMOptionalPullView extends LinearLayout {
             int lvPaddingBottom = gv.getPaddingBottom();
 //            Log.d(debug_tag, "lastVisiblePosition=" + lastVisiblePosition + ", lv.getCount()=" + lv.getCount()
 //                    + ", lastChildViewBottom=" + lastChildViewBottom + ", lvPaddingBottom=" + lvPaddingBottom + ", h=" + lv.getHeight());
-            if(lastVisiblePosition == gv.getCount()-1 && lastChildViewBottom + lvPaddingBottom == gv.getHeight()) {
+            if(lastVisiblePosition == gv.getCount()-1 && lastChildViewBottom + lvPaddingBottom <= gv.getHeight()) {
                 Log.d(debug_tag, "GridView isMostBottom!");
                 return true;
             }
