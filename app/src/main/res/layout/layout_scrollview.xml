@@ -12,6 +12,26 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="right"
+                android:orientation="horizontal">
+                <ToggleButton
+                    android:id="@+id/tb_down"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textOn="下拉开启"
+                    android:textOff="下拉关闭"
+                    android:checked="true"/>
+                <ToggleButton
+                    android:id="@+id/tb_up"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textOn="上拉开启"
+                    android:textOff="上拉关闭"
+                    android:checked="true"/>
+            </LinearLayout>
             <TextView
                 android:layout_width="100dp"
                 android:layout_height="100dp"

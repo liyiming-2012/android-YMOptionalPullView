@@ -4,7 +4,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.CompoundButton;
 import android.widget.GridView;
+import android.widget.ToggleButton;
 
 import com.yiming.optionalpullview.YMOptionalPullView;
 
@@ -12,7 +14,7 @@ import com.yiming.optionalpullview.YMOptionalPullView;
  * author:yiming
  * date  :2016/4/14
  */
-public class ScrollViewDemo extends AppCompatActivity implements YMOptionalPullView.OnPullListener {
+public class ScrollViewDemo extends AppCompatActivity implements YMOptionalPullView.OnPullListener, CompoundButton.OnCheckedChangeListener {
 
     YMOptionalPullView opv;
 
@@ -21,6 +23,8 @@ public class ScrollViewDemo extends AppCompatActivity implements YMOptionalPullV
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_scrollview);
         initYMOptionalPullView();
+        ((ToggleButton)findViewById(R.id.tb_down)).setOnCheckedChangeListener(this);
+        ((ToggleButton)findViewById(R.id.tb_up)).setOnCheckedChangeListener(this);
     }
 
     private void initYMOptionalPullView() {
@@ -41,5 +45,17 @@ public class ScrollViewDemo extends AppCompatActivity implements YMOptionalPullV
                 opv.notifyLoadComplete(true);
             }
         }, 1500);
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        switch (buttonView.getId()) {
+            case R.id.tb_down:
+                opv.setDownPullDisabled(!isChecked);
+                break;
+            case R.id.tb_up:
+                opv.setUpPullDisabled(!isChecked);
+                break;
+        }
     }
 }

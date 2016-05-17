@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.DecelerateInterpolator;
+import android.widget.AbsListView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -92,6 +93,30 @@ public class YMOptionalPullView extends LinearLayout {
 
     public void setContentViewLocator(ContentViewLocator locator) {
         this.mContentViewLocator = locator;
+    }
+
+    /**
+     * 设置是否关闭下拉功能
+     * @param disabled
+     */
+    public void setDownPullDisabled(boolean disabled) {
+        this.downPullDisabled = disabled;
+    }
+
+    public boolean getDownPullDisabled() {
+        return this.downPullDisabled;
+    }
+
+    /**
+     * 设置是否关闭上拉功能
+     * @param disabled
+     */
+    public void setUpPullDisabled(boolean disabled) {
+        this.upPullDisabled = disabled;
+    }
+
+    public boolean getUpPullDisabled() {
+        return this.upPullDisabled;
     }
 
 /********************以下是定制需要实现的接口*************************************************************/
@@ -314,11 +339,16 @@ public class YMOptionalPullView extends LinearLayout {
     private LinearLayout mBottomView;
     private Mode mMode = Mode.NEITHER_PULL;
     private float lastDownActionY;
-    private boolean  isMostTop;
+    private boolean isMostTop;
     private boolean isMostBottom;
+    /**控制下拉功能是否失效*/
+    private boolean downPullDisabled;
+    /**控制上拉功能是否失效*/
+    private boolean upPullDisabled;
     private int mTouchSlop;
     private float overflowY;
     private float overflowYIncrement;
+    private float gap;
 
     public static enum Mode {
         UP_PULL,
@@ -424,7 +454,7 @@ public class YMOptionalPullView extends LinearLayout {
     public boolean onInterceptTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-//                Log.d(debug_tag, "onInterceptTouchEvent(Down) y=" + ev.getY());
+                Log.d(debug_tag, "onInterceptTouchEvent(Down) y=" + ev.getY());
                 if(mTopView.getHeight() > 0 || mBottomView.getHeight() > 0) {
                     return super.onInterceptTouchEvent(ev);
                 }
@@ -439,27 +469,24 @@ public class YMOptionalPullView extends LinearLayout {
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-//                Log.d(debug_tag, "onInterceptTouchEvent(Up) y=" + ev.getY());
+                Log.d(debug_tag, "onInterceptTouchEvent(Up) y=" + ev.getY());
                 isMostBottom = false;
                 isMostTop = false;
                 overflowYIncrement = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
-//                Log.d(debug_tag, "onInterceptTouchEvent(Move) y=" + ev.getY());
-                if(isMostTop && (mMode == Mode.BOTH_PULL || mMode == Mode.DOWN_PULL)) {
-                    overflowY = ev.getY() - lastDownActionY;
-                    if(overflowY > mTouchSlop) {
-                        Log.d(debug_tag, "onInterceptTouchEvent(Move) 拦截了，开始下拉");
-                        transformViewIsDownPull = true;
-                        return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
-                    }
-                } else if(isMostBottom && (mMode == Mode.BOTH_PULL || mMode == Mode.UP_PULL)) {
-                    overflowY = lastDownActionY - ev.getY();
-                    if(overflowY > mTouchSlop) {
-                        Log.d(debug_tag, "onInterceptTouchEvent(Move) 拦截了,开始上拉");
-                        transformViewIsDownPull = false;
-                        return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
-                    }
+                Log.d(debug_tag, "onInterceptTouchEvent(Move) y=" + ev.getY());
+                gap = ev.getY() - lastDownActionY;
+                if(gap > mTouchSlop && isMostTop && (mMode == Mode.BOTH_PULL || mMode == Mode.DOWN_PULL) && !downPullDisabled) {
+                    overflowY = Math.abs(gap);
+                    Log.d(debug_tag, "onInterceptTouchEvent(Move) 拦截了，开始下拉");
+                    transformViewIsDownPull = true;
+                    return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
+                } else if(gap < -mTouchSlop && isMostBottom && (mMode == Mode.BOTH_PULL || mMode == Mode.UP_PULL) && !upPullDisabled) {
+                    overflowY = Math.abs(gap);
+                    Log.d(debug_tag, "onInterceptTouchEvent(Move) 拦截了,开始上拉");
+                    transformViewIsDownPull = false;
+                    return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
                 }
                 break;
         }
@@ -487,16 +514,19 @@ public class YMOptionalPullView extends LinearLayout {
     public boolean onTouchEvent(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
+                Log.d(debug_tag, "onTouchEvent(Down) y=" + event.getY());
                 break;
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
+                Log.d(debug_tag, "onTouchEvent(UP) y=" + event.getY());
                 startRecover();
                 isMostBottom = false;
                 isMostTop = false;
                 overflowYIncrement = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
+                Log.d(debug_tag, "onTouchEvent(MOVE) y=" + event.getY());
                 float temp;
                 if(transformViewIsDownPull) {
                     temp = event.getY() - lastDownActionY;
@@ -542,7 +572,7 @@ public class YMOptionalPullView extends LinearLayout {
             } else if(mContentView instanceof ScrollView) {
                 ScrollView sv = (ScrollView) mContentView;
                 sv.fullScroll(ScrollView.FOCUS_DOWN);
-            } else {
+            } else if(mContentView instanceof AbsListView){
                 mContentView.scrollTo(0, params.height);
             }
         }
@@ -617,9 +647,12 @@ public class YMOptionalPullView extends LinearLayout {
         } else if(contentView instanceof ScrollView) {
             mContentViewLocator = new ScrollViewLocator();
             return true;
+        } else {
+            mContentViewLocator = new NonScrollViewLocator();
+            return true;
         }
 
-        return false;
+//        return false;
     }
 
 /*******************************以下是默认支持的滑动View定位器实现类*******************************************************/
@@ -682,7 +715,7 @@ public class YMOptionalPullView extends LinearLayout {
             View childView = manager.findViewByPosition(manager.getItemCount()-1);
             if(childView != null) {
                 RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) childView.getLayoutParams();
-                if(childView.getBottom() == rv.getHeight() - rv.getPaddingBottom() - params.bottomMargin) {
+                if(childView.getBottom() <= rv.getHeight() - rv.getPaddingBottom() - params.bottomMargin) {
                     Log.d(debug_tag, "RecyclerView isMostBottom!");
                     return true;
                 }
@@ -739,14 +772,25 @@ public class YMOptionalPullView extends LinearLayout {
         public boolean isMostBottom(View contentView) {
             ScrollView sv = (ScrollView)contentView;
             View childView = sv.getChildAt(0);
-            if(childView.getMeasuredHeight() + sv.getPaddingBottom() == sv.getScrollY() + sv.getMeasuredHeight()) {
+            if(childView.getMeasuredHeight() + sv.getPaddingBottom() <= sv.getScrollY() + sv.getMeasuredHeight()) {
                 return true;
             }
-//            Log.d(debug_tag, "getY=" + sv.getY() + ", getScrollY=" + sv.getScrollY());
-//            Log.d(debug_tag, "h=" + sv.getHeight() + ", measuredH=" + sv.getMeasuredHeight());
-//            Log.d(debug_tag, "child mh=" + childView.getMeasuredHeight() + ", child H=" + childView.getHeight());
-
             return false;
+        }
+    }
+
+    public static class NonScrollViewLocator implements ContentViewLocator {
+
+        @Override
+        public boolean isMostTop(View contentView) {
+            Log.d(debug_tag, "NonScrollViewLocator isMostTop()");
+            return true;
+        }
+
+        @Override
+        public boolean isMostBottom(View contentView) {
+            Log.d(debug_tag, "NonScrollViewLocator isMostBottom()");
+            return true;
         }
     }
 }

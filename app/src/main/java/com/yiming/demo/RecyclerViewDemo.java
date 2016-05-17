@@ -69,12 +69,12 @@ public class RecyclerViewDemo extends AppCompatActivity implements YMOptionalPul
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
             TextView tv = (TextView) holder.itemView;
-            tv.setText("text " + position + 1);
+            tv.setText("text " + (position + 1));
         }
 
         @Override
         public int getItemCount() {
-            return 20;
+            return 9;
         }
 
         class MyViewHolder extends RecyclerView.ViewHolder {
