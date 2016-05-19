@@ -10,9 +10,9 @@ import android.widget.ListView;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
-    private String[] items = {"ListView", "RecyclerView", "GridView", "ScrollView", "Non-ScrollView", "WebView"};
-    private Class[] acts = {ListViewDemo.class, RecyclerViewDemo.class, GridViewDemo.class,
-            ScrollViewDemo.class, NonScrollViewDemo.class, WebViewDemo.class};
+    private String[] items = {"RecyclerView", "ListView", "GridView", "WebView", "ScrollView", "Non-ScrollView"};
+    private Class[] acts = {RecyclerViewDemo.class, ListViewDemo.class,  GridViewDemo.class,
+            WebViewDemo.class, ScrollViewDemo.class, NonScrollViewDemo.class};
     private ListView listView;
 
     @Override
