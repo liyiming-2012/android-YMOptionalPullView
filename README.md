@@ -1,4 +1,4 @@
-# android-YMOptionalPullView Android下拉刷新库
+# YMOptionalPullView Android下拉刷新库
 
 特点：
 1. 仅需1个超级View类文件(YMOptionalPullView.java)即可
