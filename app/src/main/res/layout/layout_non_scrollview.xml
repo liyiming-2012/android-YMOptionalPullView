@@ -4,26 +4,26 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <RelativeLayout
+    <LinearLayout
         android:layout_width="match_parent"
-        android:background="#00bb88"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="horizontal">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="150dp"
             android:background="#ff00bbbb"
+            android:layout_gravity="top"
             android:padding="10dp"
             android:text="This is a LinearLayout! " />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="300dp"
-            android:layout_alignParentBottom="true"
+            android:layout_gravity="bottom"
             android:background="#ff2288aa"
             android:padding="10dp"
             android:text="Support more View" />
-    </RelativeLayout>
+    </LinearLayout>
 
 </com.yiming.optionalpullview.YMOptionalPullView>

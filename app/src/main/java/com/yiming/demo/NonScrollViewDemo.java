@@ -3,6 +3,7 @@ package com.yiming.demo;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.LinearLayout;
 
 import com.yiming.optionalpullview.YMOptionalPullView;
 
@@ -14,9 +15,6 @@ public class NonScrollViewDemo extends AppCompatActivity implements YMOptionalPu
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.layout_non_scrollview);
-        initYMOptionalPullView();
-    }
-    private void initYMOptionalPullView() {
         opv = (YMOptionalPullView) findViewById(R.id.opv);
         opv.setOnPullListener(this);
     }

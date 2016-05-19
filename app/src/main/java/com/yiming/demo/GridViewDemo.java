@@ -28,7 +28,7 @@ public class GridViewDemo extends AppCompatActivity implements YMOptionalPullVie
 
     private void initGridView() {
         gridView = (GridView) findViewById(R.id.gridView);
-        String[] arr = new String[80];
+        String[] arr = new String[20];
         for (int i=0; i<arr.length; i++) arr[i] = "item " + (i+1);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr);
         gridView.setAdapter(adapter);

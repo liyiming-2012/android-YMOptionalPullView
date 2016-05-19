@@ -21,13 +21,26 @@ public class ListViewDemo extends AppCompatActivity implements YMOptionalPullVie
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.layout_listview);
-        initListView();
+        setContent1();//是否XML布局
+//        setContent2();//使用代码中设置布局
         initYMOptionalPullView();
+        initListView();
+    }
+
+    private void setContent1() {
+        setContentView(R.layout.layout_listview);
+        opv = (YMOptionalPullView) findViewById(R.id.opv);
+        listView = (ListView) findViewById(R.id.listview);
+    }
+
+    private void setContent2() {
+        opv = new YMOptionalPullView(this);
+        listView = new ListView(this);
+        opv.setContentView(listView);
+        setContentView(opv);
     }
 
     private void initListView() {
-        listView = (ListView) findViewById(R.id.listview);
         String[] arr = new String[20];
         for (int i=0; i<arr.length; i++) arr[i] = "item " + (i+1);
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, arr);
@@ -35,7 +48,6 @@ public class ListViewDemo extends AppCompatActivity implements YMOptionalPullVie
     }
 
     private void initYMOptionalPullView() {
-        opv = (YMOptionalPullView) findViewById(R.id.opv);
         opv.setOnPullListener(this);
     }
 

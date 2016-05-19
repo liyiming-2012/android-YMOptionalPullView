@@ -74,7 +74,7 @@ public class RecyclerViewDemo extends AppCompatActivity implements YMOptionalPul
 
         @Override
         public int getItemCount() {
-            return 9;
+            return 20;
         }
 
         class MyViewHolder extends RecyclerView.ViewHolder {
