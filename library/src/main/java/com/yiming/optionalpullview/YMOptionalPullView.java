@@ -14,8 +14,10 @@ import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.AbsListView;
+import android.webkit.WebView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -51,12 +53,11 @@ public class YMOptionalPullView extends LinearLayout {
             throw new UnsupportedOperationException("ContentView exist already!");
         }
         if(layoutParams == null) {
-            layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, 0);
+            layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         } else {
             layoutParams.width = LayoutParams.MATCH_PARENT;
-            layoutParams.height = 0;
+            layoutParams.height = LayoutParams.MATCH_PARENT;
         }
-        layoutParams.weight = 1;
         mContentView = contentView;
         contentLayoutParams = layoutParams;
         addView(mContentView, 1, contentLayoutParams);
@@ -67,6 +68,7 @@ public class YMOptionalPullView extends LinearLayout {
         if(mBottomView == null) {
             adddBottomView();
         }
+        resetHeight();
     }
 
     public void setOnPullListener(OnPullListener onPullListener) {
@@ -243,7 +245,7 @@ public class YMOptionalPullView extends LinearLayout {
             topView.addView(content, layoutParams);
 //            topView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             topView.setGravity(Gravity.CENTER);
-            topView.setBackgroundColor(0xffcccccc);
+            topView.setBackgroundColor(0xcccccccc);
         }
 
         @Override
@@ -268,7 +270,7 @@ public class YMOptionalPullView extends LinearLayout {
             bottomView.addView(content, layoutParams);
 //            bottomView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             bottomView.setGravity(Gravity.CENTER);
-            bottomView.setBackgroundColor(0xffcccccc);
+            bottomView.setBackgroundColor(0xcccccccc);
         }
 
         @Override
@@ -384,15 +386,29 @@ public class YMOptionalPullView extends LinearLayout {
         if(mBottomView == null) {
             adddBottomView();
         }
+        resetHeight();
+    }
+
+    private void resetHeight() {
+        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+//                Log.d(debug_tag, "高度=" + mContentView.getMeasuredHeight());
+                getViewTreeObserver().removeOnPreDrawListener(this);
+                contentLayoutParams= (LayoutParams) mContentView.getLayoutParams();
+                contentLayoutParams.height = mContentView.getMeasuredHeight();
+                mContentView.setLayoutParams(contentLayoutParams);
+                return true;
+            }
+        });
     }
 
     private void setupContentView() {
         if(getChildCount() >= 2) {
             mContentView = getChildAt(1);
             contentLayoutParams= (LayoutParams) mContentView.getLayoutParams();
-            contentLayoutParams.weight = 1;
             contentLayoutParams.width = LayoutParams.MATCH_PARENT;
-            contentLayoutParams.height = 0;
+            contentLayoutParams.height = LayoutParams.MATCH_PARENT;
             mContentView.setLayoutParams(contentLayoutParams);
             if(!selectLocator(mContentView)) {
                 Log.e(debug_tag,
@@ -449,12 +465,17 @@ public class YMOptionalPullView extends LinearLayout {
         mViewBuilder.appearLoadComplete(succeed, transformViewIsDownPull);
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        super.dispatchTouchEvent(ev);
+        return true;
+    }
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        Log.d(debug_tag, "onIntercept(" + ev.getAction() + ") y=" + ev.getY());
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
-                Log.d(debug_tag, "onInterceptTouchEvent(Down) y=" + ev.getY());
                 if(mTopView.getHeight() > 0 || mBottomView.getHeight() > 0) {
                     return super.onInterceptTouchEvent(ev);
                 }
@@ -469,29 +490,71 @@ public class YMOptionalPullView extends LinearLayout {
             case MotionEvent.ACTION_OUTSIDE:
             case MotionEvent.ACTION_CANCEL:
             case MotionEvent.ACTION_UP:
-                Log.d(debug_tag, "onInterceptTouchEvent(Up) y=" + ev.getY());
                 isMostBottom = false;
                 isMostTop = false;
                 overflowYIncrement = 0;
                 break;
             case MotionEvent.ACTION_MOVE:
-                Log.d(debug_tag, "onInterceptTouchEvent(Move) y=" + ev.getY());
-                gap = ev.getY() - lastDownActionY;
-                if(gap > mTouchSlop && isMostTop && (mMode == Mode.BOTH_PULL || mMode == Mode.DOWN_PULL) && !downPullDisabled) {
-                    overflowY = Math.abs(gap);
-                    Log.d(debug_tag, "onInterceptTouchEvent(Move) 拦截了，开始下拉");
-                    transformViewIsDownPull = true;
-                    return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
-                } else if(gap < -mTouchSlop && isMostBottom && (mMode == Mode.BOTH_PULL || mMode == Mode.UP_PULL) && !upPullDisabled) {
-                    overflowY = Math.abs(gap);
-                    Log.d(debug_tag, "onInterceptTouchEvent(Move) 拦截了,开始上拉");
-                    transformViewIsDownPull = false;
-                    return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
+                isInToOnTouch = false;
+                if(isIntercept(ev)) {
+                    return true;
                 }
                 break;
         }
 
         return super.onInterceptTouchEvent(ev);
+    }
+
+    private boolean isIntercept(MotionEvent ev) {
+        gap = ev.getY() - lastDownActionY;
+        if(gap > mTouchSlop && isMostTop && (mMode == Mode.BOTH_PULL || mMode == Mode.DOWN_PULL) && !downPullDisabled) {
+            overflowY = Math.abs(gap);
+            Log.d(debug_tag, "onIntercept(Move) 拦截了，开始下拉");
+            transformViewIsDownPull = true;
+            setGravity(Gravity.TOP);
+            return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
+        } else if(gap < -mTouchSlop && isMostBottom && (mMode == Mode.BOTH_PULL || mMode == Mode.UP_PULL) && !upPullDisabled) {
+            overflowY = Math.abs(gap);
+            Log.d(debug_tag, "onIntercept(Move) 拦截了,开始上拉");
+            transformViewIsDownPull = false;
+            setGravity(Gravity.BOTTOM);
+            return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
+        }
+        return false;
+    }
+
+    /**为了兼容没有消费事件的子View，记录是否进入onTouchEvent()的标记*/
+    private boolean isInToOnTouch = false;
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+//                Log.d(debug_tag, "!!!!!!!!!onTouch(Down) y=" + event.getY());
+                isInToOnTouch = true;
+                break;
+            case MotionEvent.ACTION_OUTSIDE:
+            case MotionEvent.ACTION_CANCEL:
+            case MotionEvent.ACTION_UP:
+//                Log.d(debug_tag, "onTouch(UP) y=" + event.getY());
+                startRecover();
+                isMostBottom = false;
+                isMostTop = false;
+                overflowYIncrement = 0;
+                break;
+            case MotionEvent.ACTION_MOVE:
+//                Log.d(debug_tag, "onTouch(MOVE) y=" + event.getY());
+                if(isInToOnTouch) {
+                    if(isIntercept(event)) {
+                        isInToOnTouch = false;
+                        prePullTransition(event);
+                    }
+                } else {
+                    prePullTransition(event);
+                }
+                break;
+        }
+        return super.onTouchEvent(event);
     }
 
     private boolean isMostTop() {
@@ -510,51 +573,31 @@ public class YMOptionalPullView extends LinearLayout {
         return mContentViewLocator.isMostBottom(mContentView);
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                Log.d(debug_tag, "onTouchEvent(Down) y=" + event.getY());
-                break;
-            case MotionEvent.ACTION_OUTSIDE:
-            case MotionEvent.ACTION_CANCEL:
-            case MotionEvent.ACTION_UP:
-                Log.d(debug_tag, "onTouchEvent(UP) y=" + event.getY());
-                startRecover();
-                isMostBottom = false;
-                isMostTop = false;
-                overflowYIncrement = 0;
-                break;
-            case MotionEvent.ACTION_MOVE:
-                Log.d(debug_tag, "onTouchEvent(MOVE) y=" + event.getY());
-                float temp;
-                if(transformViewIsDownPull) {
-                    temp = event.getY() - lastDownActionY;
-                } else {
-                    temp = lastDownActionY - event.getY();
-                }
-                if(temp >= 0) {
-                    overflowYIncrement = temp - overflowY;
-                    overflowY = temp;
-                    pullTransition();
-                }
-                break;
+    private void prePullTransition(MotionEvent event) {
+        float temp;
+        if(transformViewIsDownPull) {
+            temp = event.getY() - lastDownActionY;
+        } else {
+            temp = lastDownActionY - event.getY();
         }
-
-        return super.onTouchEvent(event);
+        if(temp >= 0) {
+            overflowYIncrement = temp - overflowY;
+            overflowY = temp;
+            pullTransition();
+        }
     }
 
     private void pullTransition() {
         if(transformViewIsDownPull) {//下拉
             float height =  mTopView.getHeight() + overflowYIncrement * (1-mTopView.getHeight()/maxheight);
-            changleViewHeight(height, true);
+            changeViewHeight(height, true);
         } else {//上拉
             float height =  mBottomView.getHeight() + overflowYIncrement * (1-mBottomView.getHeight()/maxheight);
-            changleViewHeight(height, true);
+            changeViewHeight(height, true);
         }
     }
 
-    private void changleViewHeight(float height, boolean refreshContent) {
+    private void changeViewHeight(float height, boolean refreshContent) {
         if(height > maxheight) {
             height = maxheight;
         } else if(height < 0) {
@@ -565,17 +608,6 @@ public class YMOptionalPullView extends LinearLayout {
         LayoutParams params = (LayoutParams) view.getLayoutParams();
         params.height = (int) height;
         view.setLayoutParams(params);
-        if(view == mBottomView) {
-            if(mContentView instanceof RecyclerView) {//兼容
-                RecyclerView rv = (RecyclerView) mContentView;
-                rv.scrollBy(0, (int) height);
-            } else if(mContentView instanceof ScrollView) {
-                ScrollView sv = (ScrollView) mContentView;
-                sv.fullScroll(ScrollView.FOCUS_DOWN);
-            } else if(mContentView instanceof AbsListView){
-                mContentView.scrollTo(0, params.height);
-            }
-        }
         if(refreshContent) {
             appearDraggingState(height);
         }
@@ -594,7 +626,7 @@ public class YMOptionalPullView extends LinearLayout {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
-                changleViewHeight(value, false);
+                changeViewHeight(value, false);
             }
         });
         animator1.addListener(new AnimatorListenerAdapter() {
@@ -622,7 +654,7 @@ public class YMOptionalPullView extends LinearLayout {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
-                changleViewHeight(value, false);
+                changeViewHeight(value, false);
             }
         });
         animator1.start();
@@ -647,6 +679,9 @@ public class YMOptionalPullView extends LinearLayout {
         } else if(contentView instanceof ScrollView) {
             mContentViewLocator = new ScrollViewLocator();
             return true;
+        } else if(contentView instanceof WebView) {
+            mContentViewLocator = new WebViewLocator();
+            return true;
         } else {
             mContentViewLocator = new NonScrollViewLocator();
             return true;
@@ -665,10 +700,7 @@ public class YMOptionalPullView extends LinearLayout {
             int firstVisiblePosition = lv.getFirstVisiblePosition();
             int firstChildViewTop = lv.getChildAt(0).getTop();
             int lvPaddingTop = lv.getPaddingTop();
-//            Log.d(debug_tag, "firstVisiblePosition=" + firstVisiblePosition
-//                    + ", firstChildViewTop=" + firstChildViewTop + ", lvPaddingTop=" + lvPaddingTop);
             if(firstVisiblePosition == 0 && firstChildViewTop - lvPaddingTop == 0) {
-                Log.d(debug_tag, "ListView isMostTop!");
                 return true;
             }
             return false;
@@ -680,10 +712,7 @@ public class YMOptionalPullView extends LinearLayout {
             int lastVisiblePosition = lv.getLastVisiblePosition();
             int lastChildViewBottom = lv.getChildAt(lv.getChildCount()-1).getBottom();
             int lvPaddingBottom = lv.getPaddingBottom();
-//            Log.d(debug_tag, "lastVisiblePosition=" + lastVisiblePosition + ", lv.getCount()=" + lv.getCount()
-//                    + ", lastChildViewBottom=" + lastChildViewBottom + ", lvPaddingBottom=" + lvPaddingBottom + ", h=" + lv.getHeight());
             if(lastVisiblePosition == lv.getCount()-1 && lastChildViewBottom + lvPaddingBottom <= lv.getHeight()) {
-                Log.d(debug_tag, "ListView isMostBottom!");
                 return true;
             }
             return false;
@@ -696,12 +725,10 @@ public class YMOptionalPullView extends LinearLayout {
         public boolean isMostTop(View contentView) {
             RecyclerView rv = (RecyclerView)contentView;
             RecyclerView.LayoutManager manager = rv.getLayoutManager();
-//            int childTop = manager.getChildAt(0).getTop() - rv.getPaddingTop();
             View childView = manager.findViewByPosition(0);
             if(childView != null) {
                 RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) childView.getLayoutParams();
                 if(childView.getTop() == rv.getPaddingTop() + params.topMargin) {
-                    Log.d(debug_tag, "RecyclerView isMostBottom!");
                     return true;
                 }
             }
@@ -716,7 +743,6 @@ public class YMOptionalPullView extends LinearLayout {
             if(childView != null) {
                 RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) childView.getLayoutParams();
                 if(childView.getBottom() <= rv.getHeight() - rv.getPaddingBottom() - params.bottomMargin) {
-                    Log.d(debug_tag, "RecyclerView isMostBottom!");
                     return true;
                 }
             }
@@ -732,10 +758,7 @@ public class YMOptionalPullView extends LinearLayout {
             int firstVisiblePosition = gv.getFirstVisiblePosition();
             int firstChildViewTop = gv.getChildAt(0).getTop();
             int lvPaddingTop = gv.getPaddingTop();
-//            Log.d(debug_tag, "firstVisiblePosition=" + firstVisiblePosition
-//                    + ", firstChildViewTop=" + firstChildViewTop + ", lvPaddingTop=" + lvPaddingTop);
             if(firstVisiblePosition == 0 && firstChildViewTop - lvPaddingTop == 0) {
-                Log.d(debug_tag, "GridView isMostTop!");
                 return true;
             }
             return false;
@@ -747,10 +770,7 @@ public class YMOptionalPullView extends LinearLayout {
             int lastVisiblePosition = gv.getLastVisiblePosition();
             int lastChildViewBottom = gv.getChildAt(gv.getChildCount()-1).getBottom();
             int lvPaddingBottom = gv.getPaddingBottom();
-//            Log.d(debug_tag, "lastVisiblePosition=" + lastVisiblePosition + ", lv.getCount()=" + lv.getCount()
-//                    + ", lastChildViewBottom=" + lastChildViewBottom + ", lvPaddingBottom=" + lvPaddingBottom + ", h=" + lv.getHeight());
             if(lastVisiblePosition == gv.getCount()-1 && lastChildViewBottom + lvPaddingBottom <= gv.getHeight()) {
-                Log.d(debug_tag, "GridView isMostBottom!");
                 return true;
             }
             return false;
@@ -779,17 +799,36 @@ public class YMOptionalPullView extends LinearLayout {
         }
     }
 
+    public static class WebViewLocator implements ContentViewLocator {
+
+        @Override
+        public boolean isMostTop(View contentView) {
+            WebView wv = (WebView) contentView;
+            if(wv.getScrollY() == 0) {
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean isMostBottom(View contentView) {
+            WebView wv = (WebView) contentView;
+            if(wv.getContentHeight()*wv.getScale() == (wv.getHeight()+wv.getScrollY())){
+                return true;
+            }
+            return false;
+        }
+    }
+
     public static class NonScrollViewLocator implements ContentViewLocator {
 
         @Override
         public boolean isMostTop(View contentView) {
-            Log.d(debug_tag, "NonScrollViewLocator isMostTop()");
             return true;
         }
 
         @Override
         public boolean isMostBottom(View contentView) {
-            Log.d(debug_tag, "NonScrollViewLocator isMostBottom()");
             return true;
         }
     }
