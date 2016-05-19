@@ -1,8 +1,8 @@
 # android-YMOptionalPullView Android下拉刷新库
 
 特点：
-1. 仅需1个类文件(YMOptionalPullView.java)即可
-2. 接入代码最少、逻辑最简单、兼容性最好、自定义最容易、扩展性最强...
+1. 仅需1个超级View类文件(YMOptionalPullView.java)即可
+2. 接入代码最少、逻辑最简单、兼容性最好、自定义最容易...
 
 支持说明：
 1. 支持上拉、下拉、上下拉
