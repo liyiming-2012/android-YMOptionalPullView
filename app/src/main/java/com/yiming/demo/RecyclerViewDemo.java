@@ -54,7 +54,7 @@ public class RecyclerViewDemo extends AppCompatActivity implements YMOptionalPul
             public void run() {
                 opv.notifyLoadComplete(true);
             }
-        }, 1500);
+        }, 2000);
     }
 
     private RecyclerView.Adapter adapter = new RecyclerView.Adapter() {

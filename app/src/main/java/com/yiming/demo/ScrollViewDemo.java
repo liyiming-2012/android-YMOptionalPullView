@@ -44,7 +44,7 @@ public class ScrollViewDemo extends AppCompatActivity implements YMOptionalPullV
             public void run() {
                 opv.notifyLoadComplete(true);
             }
-        }, 1500);
+        }, 2000);
     }
 
     @Override

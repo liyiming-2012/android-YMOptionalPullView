@@ -31,6 +31,6 @@ public class NonScrollViewDemo extends AppCompatActivity implements YMOptionalPu
             public void run() {
                 opv.notifyLoadComplete(true);
             }
-        }, 1500);
+        }, 2000);
     }
 }

@@ -54,6 +54,17 @@ public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilde
         return density * 60;
     }
 
+    private TextView getText(CharSequence text) {
+        TextView tv = new TextView(mContext);
+        tv.setText(text);
+        tv.setEms(6);
+        tv.setTextColor(Color.DKGRAY);
+        tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+        tv.setPadding((int) (density * 5), 0, 0, 0);
+        tv.setGravity(Gravity.CENTER);
+        return tv;
+    }
+
     @Override
     public void addCustomViewToTopView(LinearLayout topView) {
         LinearLayout content = new LinearLayout(mContext);
@@ -63,13 +74,7 @@ public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilde
         topIv.setImageResource(R.drawable.loading_anim1);
         content.addView(topIv, (int)(density * 40), (int)(density * 40));
 
-        topTv = new TextView(mContext);
-        topTv.setText(topLoadingText);
-        topTv.setEms(6);
-        topTv.setTextColor(Color.DKGRAY);
-        topTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        topTv.setPadding((int) (density * 5), 0, 0, 0);
-        topTv.setGravity(Gravity.CENTER);
+        topTv = getText(topLoadingText);
         content.addView(topTv);
 
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -88,13 +93,7 @@ public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilde
         bottomIv.setImageResource(R.drawable.loading_anim1);
         content.addView(bottomIv, (int)(density * 40), (int)(density * 40));
 
-        bottomTv = new TextView(mContext);
-        bottomTv.setText(bottomLoadingText);
-        bottomTv.setEms(6);
-        bottomTv.setTextColor(Color.DKGRAY);
-        bottomTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-        bottomTv.setPadding((int) (density * 5), 0, 0, 0);
-        bottomTv.setGravity(Gravity.CENTER);
+        bottomTv = getText(bottomLoadingText);
         content.addView(bottomTv);
 
         LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -155,5 +154,10 @@ public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilde
                 bottomIv.setImageResource(R.drawable.loading_anim1);
             }
         }
+    }
+
+    @Override
+    public void onRestore() {
+
     }
 }

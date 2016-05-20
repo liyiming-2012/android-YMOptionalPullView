@@ -63,6 +63,6 @@ public class ListViewDemo extends AppCompatActivity implements YMOptionalPullVie
             public void run() {
                 opv.notifyLoadComplete(true);
             }
-        }, 1500);
+        }, 2000);
     }
 }
