@@ -2,6 +2,7 @@ package com.yiming.optionalpullview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
@@ -15,7 +16,9 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewTreeObserver;
+import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.RotateAnimation;
 import android.webkit.WebView;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -100,6 +103,8 @@ public class YMOptionalPullView extends LinearLayout {
         this.mViewBuilder = tvb;
         maxheight = tvb.getDragMaxHeight();
         criticalValue = tvb.getCriticalHeight();
+        addContentToTopView(mTopView);
+        addContentToBottomView(mBottomView);
     }
 
     /**
@@ -211,10 +216,6 @@ public class YMOptionalPullView extends LinearLayout {
 
 /********************以下是自带的加载样式*************************************************************/
 
-    private TextView topTv;
-    private ImageView topIv;
-    private TextView bottomTv;
-    private ImageView bottomIv;
     /**
      * 自带的样式
      */
@@ -229,6 +230,13 @@ public class YMOptionalPullView extends LinearLayout {
         public String bottomDraggingText2 = "松开加载更多";
         public String bottomLoadingText = "正在努力加载";
         public String bottomLoadedText = "加载成功";
+
+        private TextView topTv;
+        private TextView topIndicator;
+        private TextView bottomTv;
+        private TextView bottomIndicator;
+        private RotateAnimation topLoadingAnim;
+        private RotateAnimation bottomLoadingAnim;
 
         @Override
         public float getDragMaxHeight() {
@@ -245,20 +253,30 @@ public class YMOptionalPullView extends LinearLayout {
             float density = getResources().getDisplayMetrics().density;
             LinearLayout content = new LinearLayout(getContext());
             content.setGravity(Gravity.CENTER);
+
+            topIndicator = new TextView(getContext());
+            topIndicator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+            topIndicator.setTextColor(Color.DKGRAY);
+            topIndicator.setGravity(Gravity.CENTER);
+            topIndicator.setText("↓");
+//            content.addView(topIndicator);
+            content.addView(topIndicator, (int)(density * 40), (int)(density * 40));
+
+            topLoadingAnim = new RotateAnimation(0f,360f, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+            topLoadingAnim.setDuration(500);
+            topLoadingAnim.setRepeatCount(ValueAnimator.INFINITE);//无限循环
+            topLoadingAnim.setRepeatMode(ValueAnimator.INFINITE);
+
+            topTv = new TextView(getContext());
+            topTv.setText(topLoadingText);
+            topTv.setEms(6);
+            topTv.setTextColor(Color.DKGRAY);
+            topTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            topTv.setPadding((int) (density * 5), 0, 0, 0);
+            topTv.setGravity(Gravity.CENTER);
+            content.addView(topTv);
+
             LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-            ImageView iv = new ImageView(getContext());
-            iv.setImageResource(R.drawable.loading_anim1);
-            content.addView(iv, (int)(density * 40), (int)(density * 40));
-            topIv = iv;
-            TextView tv = new TextView(getContext());
-            tv.setText(topLoadingText);
-            tv.setEms(6);
-            tv.setTextColor(Color.DKGRAY);
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            tv.setPadding((int) (density * 5), 0, 0, 0);
-            tv.setGravity(Gravity.CENTER);
-            content.addView(tv);
-            topTv = tv;
             topView.addView(content, layoutParams);
 //            topView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             topView.setGravity(Gravity.CENTER);
@@ -270,20 +288,30 @@ public class YMOptionalPullView extends LinearLayout {
             float density = getResources().getDisplayMetrics().density;
             LinearLayout content = new LinearLayout(getContext());
             content.setGravity(Gravity.CENTER);
+
+            bottomIndicator = new TextView(getContext());
+            bottomIndicator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
+            bottomIndicator.setTextColor(Color.DKGRAY);
+            bottomIndicator.setGravity(Gravity.CENTER);
+            bottomIndicator.setText("↑");
+//            content.addView(bottomIndicator);
+            content.addView(bottomIndicator, (int)(density * 40), (int)(density * 40));
+
+            bottomLoadingAnim = new RotateAnimation(0f,360f, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+            bottomLoadingAnim.setDuration(500);
+            bottomLoadingAnim.setRepeatCount(ValueAnimator.INFINITE);//无限循环
+            bottomLoadingAnim.setRepeatMode(ValueAnimator.INFINITE);
+
+            bottomTv = new TextView(getContext());
+            bottomTv.setText(bottomLoadingText);
+            bottomTv.setEms(6);
+            bottomTv.setTextColor(Color.DKGRAY);
+            bottomTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            bottomTv.setPadding((int) (density * 5), 0, 0, 0);
+            bottomTv.setGravity(Gravity.CENTER);
+            content.addView(bottomTv);
+
             LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-            ImageView iv = new ImageView(getContext());
-            iv.setImageResource(R.drawable.loading_anim1);
-            content.addView(iv, (int)(density * 40), (int)(density * 40));
-            bottomIv = iv;
-            TextView tv = new TextView(getContext());
-            tv.setText(bottomLoadingText);
-            tv.setEms(6);
-            tv.setTextColor(Color.DKGRAY);
-            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            tv.setPadding((int) (density * 5), 0, 0, 0);
-            tv.setGravity(Gravity.CENTER);
-            content.addView(tv);
-            bottomTv = tv;
             bottomView.addView(content, layoutParams);
 //            bottomView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             bottomView.setGravity(Gravity.CENTER);
@@ -294,10 +322,12 @@ public class YMOptionalPullView extends LinearLayout {
         public void appearLoadComplete(boolean succeed, boolean isDownPull) {
             if(isDownPull) {
                 topTv.setText(topLoadedText);
-                topIv.setImageResource(R.drawable.load_succeed);
+                topIndicator.setText("⊙");
+                topIndicator.clearAnimation();
             } else {
                 bottomTv.setText(bottomLoadedText);
-                bottomIv.setImageResource(R.drawable.load_succeed);
+                bottomIndicator.setText("⊙");
+                bottomIndicator.clearAnimation();
             }
         }
 
@@ -305,20 +335,12 @@ public class YMOptionalPullView extends LinearLayout {
         public void appearLoadingState(boolean isDownPull) {
             if(isDownPull) {
                 topTv.setText(topLoadingText);
-                AnimationDrawable frameAnim = new AnimationDrawable();
-                frameAnim.addFrame(getResources().getDrawable(R.drawable.loading_anim1), 100);
-                frameAnim.addFrame(getResources().getDrawable(R.drawable.loading_anim2), 100);
-                frameAnim.setOneShot(false);
-                topIv.setImageDrawable(frameAnim);
-                frameAnim.start();
+                topIndicator.setText("※");
+                topIndicator.startAnimation(topLoadingAnim);
             } else {
                 bottomTv.setText(bottomLoadingText);
-                AnimationDrawable frameAnim = new AnimationDrawable();
-                frameAnim.addFrame(getResources().getDrawable(R.drawable.loading_anim1), 100);
-                frameAnim.addFrame(getResources().getDrawable(R.drawable.loading_anim2), 100);
-                frameAnim.setOneShot(false);
-                bottomIv.setImageDrawable(frameAnim);
-                frameAnim.start();
+                bottomIndicator.setText("※");
+                bottomIndicator.startAnimation(bottomLoadingAnim);
             }
         }
 
@@ -327,18 +349,18 @@ public class YMOptionalPullView extends LinearLayout {
             if(isDownPull) {
                 if(height < getCriticalHeight()) {
                     topTv.setText(topDraggingText1);
-                    topIv.setImageResource(R.drawable.load_succeed);
+                    topIndicator.setText("↓");
                 } else {
                     topTv.setText(topDraggingText2);
-                    topIv.setImageResource(R.drawable.loading_anim1);
+                    topIndicator.setText("↑");
                 }
             } else {
                 if(height < getCriticalHeight()) {
                     bottomTv.setText(bottomDraggingText1);
-                    bottomIv.setImageResource(R.drawable.load_succeed);
+                    bottomIndicator.setText("↑");
                 } else {
                     bottomTv.setText(bottomDraggingText2);
-                    bottomIv.setImageResource(R.drawable.loading_anim1);
+                    bottomIndicator.setText("↓");
                 }
             }
         }
@@ -451,11 +473,13 @@ public class YMOptionalPullView extends LinearLayout {
     }
 
     public void addContentToTopView(LinearLayout topView) {
+        topView.removeAllViews();
         mViewBuilder.addCustomViewToTopView(topView);
     }
 
 
     public void addContentToBottomView(LinearLayout bottomView) {
+        bottomView.removeAllViews();
         mViewBuilder.addCustomViewToBottomView(bottomView);
     }
 

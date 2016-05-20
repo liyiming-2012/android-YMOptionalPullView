@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 
@@ -37,6 +38,7 @@ public class GridViewDemo extends AppCompatActivity implements YMOptionalPullVie
     private void initYMOptionalPullView() {
         opv = (YMOptionalPullView) findViewById(R.id.opv);
         opv.setOnPullListener(this);
+        opv.setTransformViewBuilder(new CustomViewBuilder(this));
     }
 
     @Override
