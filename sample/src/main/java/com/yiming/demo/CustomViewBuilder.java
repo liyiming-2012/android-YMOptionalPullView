@@ -16,6 +16,7 @@ import com.yiming.optionalpullview.YMOptionalPullView;
 /**
  * author:yiming
  * date  :2016/5/20
+ * 自定义样式
  */
 public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilder {
 
@@ -65,20 +66,24 @@ public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilde
         return tv;
     }
 
+    private ImageView getImage() {
+        ImageView iv = new ImageView(mContext);
+        iv.setImageResource(R.drawable.loading_anim1);
+        return iv;
+    }
+
     @Override
     public void addCustomViewToTopView(LinearLayout topView) {
         LinearLayout content = new LinearLayout(mContext);
         content.setGravity(Gravity.CENTER);
 
-        topIv = new ImageView(mContext);
-        topIv.setImageResource(R.drawable.loading_anim1);
+        topIv = getImage();
         content.addView(topIv, (int)(density * 40), (int)(density * 40));
 
         topTv = getText(topLoadingText);
         content.addView(topTv);
 
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        topView.addView(content, layoutParams);
+        topView.addView(content, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 //            topView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         topView.setGravity(Gravity.CENTER);
         topView.setBackgroundColor(0xcccccccc);
@@ -89,15 +94,13 @@ public class CustomViewBuilder implements YMOptionalPullView.TransformViewBuilde
         LinearLayout content = new LinearLayout(mContext);
         content.setGravity(Gravity.CENTER);
 
-        bottomIv = new ImageView(mContext);
-        bottomIv.setImageResource(R.drawable.loading_anim1);
+        bottomIv = getImage();
         content.addView(bottomIv, (int)(density * 40), (int)(density * 40));
 
         bottomTv = getText(bottomLoadingText);
         content.addView(bottomTv);
 
-        LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-        bottomView.addView(content, layoutParams);
+        bottomView.addView(content, LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
 //            bottomView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
         bottomView.setGravity(Gravity.CENTER);
         bottomView.setBackgroundColor(0xcccccccc);
