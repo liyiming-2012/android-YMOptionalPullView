@@ -2,11 +2,9 @@ package com.yiming.optionalpullview;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Color;
-import android.graphics.drawable.AnimationDrawable;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -21,7 +19,6 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.RotateAnimation;
 import android.webkit.WebView;
 import android.widget.GridView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.ScrollView;
@@ -203,6 +200,11 @@ public class YMOptionalPullView extends LinearLayout {
          * @param isDownPull  true是下拉， false是上拉
          */
         void appearDraggingState(float height, boolean isDownPull);
+
+        /**
+         * 操作完后复位回调
+         */
+        void onRestore();
     }
 
 
@@ -235,80 +237,45 @@ public class YMOptionalPullView extends LinearLayout {
         private TextView topIndicator;
         private TextView bottomTv;
         private TextView bottomIndicator;
-        private RotateAnimation topLoadingAnim;
-        private RotateAnimation bottomLoadingAnim;
+        private RotateAnimation loadingAnimation;
 
         @Override
         public float getDragMaxHeight() {
-            return getResources().getDisplayMetrics().density * 200;
+            return density * 200;
         }
 
         @Override
         public float getCriticalHeight() {
-            return getResources().getDisplayMetrics().density * 60;
+            return density * 60;
         }
 
         @Override
         public void addCustomViewToTopView(LinearLayout topView) {
-            float density = getResources().getDisplayMetrics().density;
             LinearLayout content = new LinearLayout(getContext());
             content.setGravity(Gravity.CENTER);
 
-            topIndicator = new TextView(getContext());
-            topIndicator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-            topIndicator.setTextColor(Color.DKGRAY);
-            topIndicator.setGravity(Gravity.CENTER);
-            topIndicator.setText("↓");
-//            content.addView(topIndicator);
-            content.addView(topIndicator, (int)(density * 40), (int)(density * 40));
+            topIndicator = getIndicator("↓");
+            content.addView(topIndicator);
 
-            topLoadingAnim = new RotateAnimation(0f,360f, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
-            topLoadingAnim.setDuration(500);
-            topLoadingAnim.setRepeatCount(ValueAnimator.INFINITE);//无限循环
-            topLoadingAnim.setRepeatMode(ValueAnimator.INFINITE);
-
-            topTv = new TextView(getContext());
-            topTv.setText(topLoadingText);
-            topTv.setEms(6);
-            topTv.setTextColor(Color.DKGRAY);
-            topTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            topTv.setPadding((int) (density * 5), 0, 0, 0);
-            topTv.setGravity(Gravity.CENTER);
+            topTv = getTextView(topLoadingText);
             content.addView(topTv);
 
             LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
             topView.addView(content, layoutParams);
-//            topView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
+//            topView.setGravity(Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL);
             topView.setGravity(Gravity.CENTER);
             topView.setBackgroundColor(0xcccccccc);
         }
 
         @Override
         public void addCustomViewToBottomView(LinearLayout bottomView) {
-            float density = getResources().getDisplayMetrics().density;
             LinearLayout content = new LinearLayout(getContext());
             content.setGravity(Gravity.CENTER);
 
-            bottomIndicator = new TextView(getContext());
-            bottomIndicator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
-            bottomIndicator.setTextColor(Color.DKGRAY);
-            bottomIndicator.setGravity(Gravity.CENTER);
-            bottomIndicator.setText("↑");
-//            content.addView(bottomIndicator);
-            content.addView(bottomIndicator, (int)(density * 40), (int)(density * 40));
+            bottomIndicator = getIndicator("↑");
+            content.addView(bottomIndicator);
 
-            bottomLoadingAnim = new RotateAnimation(0f,360f, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
-            bottomLoadingAnim.setDuration(500);
-            bottomLoadingAnim.setRepeatCount(ValueAnimator.INFINITE);//无限循环
-            bottomLoadingAnim.setRepeatMode(ValueAnimator.INFINITE);
-
-            bottomTv = new TextView(getContext());
-            bottomTv.setText(bottomLoadingText);
-            bottomTv.setEms(6);
-            bottomTv.setTextColor(Color.DKGRAY);
-            bottomTv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
-            bottomTv.setPadding((int) (density * 5), 0, 0, 0);
-            bottomTv.setGravity(Gravity.CENTER);
+            bottomTv = getTextView(bottomLoadingText);
             content.addView(bottomTv);
 
             LayoutParams layoutParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
@@ -316,6 +283,27 @@ public class YMOptionalPullView extends LinearLayout {
 //            bottomView.setGravity(Gravity.TOP | Gravity.CENTER_HORIZONTAL);
             bottomView.setGravity(Gravity.CENTER);
             bottomView.setBackgroundColor(0xcccccccc);
+        }
+
+        private TextView getTextView(CharSequence text) {
+            TextView tv = new TextView(getContext());
+            tv.setText(text);
+            tv.setEms(6);
+            tv.setTextColor(Color.DKGRAY);
+            tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 14);
+            tv.setPadding((int) (density * 5), 0, 0, 0);
+            tv.setGravity(Gravity.CENTER);
+            return tv;
+        }
+
+        private TextView getIndicator(CharSequence text) {
+            TextView indicator = new TextView(getContext());
+            indicator.setPadding(0, 0, 0, (int)(3*density));
+            indicator.setTextSize(TypedValue.COMPLEX_UNIT_SP, 26);
+            indicator.setTextColor(Color.DKGRAY);
+            indicator.setGravity(Gravity.CENTER);
+            indicator.setText(text);
+            return indicator;
         }
 
         @Override
@@ -333,14 +321,19 @@ public class YMOptionalPullView extends LinearLayout {
 
         @Override
         public void appearLoadingState(boolean isDownPull) {
+            if(loadingAnimation == null) {
+                loadingAnimation = new RotateAnimation(0f,360f, Animation.RELATIVE_TO_SELF,0.5f,Animation.RELATIVE_TO_SELF,0.5f);
+                loadingAnimation.setDuration(500);
+                loadingAnimation.setRepeatCount(ValueAnimator.INFINITE);//无限循环
+            }
             if(isDownPull) {
                 topTv.setText(topLoadingText);
                 topIndicator.setText("※");
-                topIndicator.startAnimation(topLoadingAnim);
+                topIndicator.startAnimation(loadingAnimation);
             } else {
                 bottomTv.setText(bottomLoadingText);
                 bottomIndicator.setText("※");
-                bottomIndicator.startAnimation(bottomLoadingAnim);
+                bottomIndicator.startAnimation(loadingAnimation);
             }
         }
 
@@ -364,6 +357,10 @@ public class YMOptionalPullView extends LinearLayout {
                 }
             }
         }
+
+        @Override
+        public void onRestore() {
+        }
     };
 
 
@@ -371,6 +368,11 @@ public class YMOptionalPullView extends LinearLayout {
 
     private float maxheight = 600;
     private float criticalValue = 170;
+    /**加载成功效果显示时间*/
+    private final int completeLoadShowDelay = 200;
+
+//-------以上是需要关心配置--------//
+
 
     private ContentViewLocator mContentViewLocator;
     private OnPullListener mOnPullListener;
@@ -390,6 +392,7 @@ public class YMOptionalPullView extends LinearLayout {
     private float overflowY;
     private float overflowYIncrement;
     private float gap;
+    private float density;
 
     public static enum Mode {
         UP_PULL,
@@ -409,6 +412,7 @@ public class YMOptionalPullView extends LinearLayout {
     }
 
     private void init() {
+        density = getResources().getDisplayMetrics().density;
         if(mViewBuilder != null) {
             criticalValue = mViewBuilder.getCriticalHeight();
             maxheight = mViewBuilder.getDragMaxHeight();
@@ -496,6 +500,9 @@ public class YMOptionalPullView extends LinearLayout {
      */
     private void appearLoadingState() {
         mViewBuilder.appearLoadingState(transformViewIsDownPull);
+        if (mOnPullListener != null) {
+            mOnPullListener.onLoad(YMOptionalPullView.this, transformViewIsDownPull);
+        }
     }
 
     /**
@@ -504,6 +511,13 @@ public class YMOptionalPullView extends LinearLayout {
      */
     private void appearLoadComplete(boolean succeed) {
         mViewBuilder.appearLoadComplete(succeed, transformViewIsDownPull);
+    }
+
+    /**
+     * 复位后调用
+     */
+    private void restoreState() {
+        mViewBuilder.onRestore();
     }
 
     @Override
@@ -674,10 +688,12 @@ public class YMOptionalPullView extends LinearLayout {
             @Override
             public void onAnimationEnd(Animator animation) {
                 super.onAnimationEnd(animation);
-                appearLoadingState();
-                if (overtopCritical && mOnPullListener != null) {
-                    mOnPullListener.onLoad(YMOptionalPullView.this, transformViewIsDownPull);
+                if(overtopCritical) {
+                    appearLoadingState();
+                } else {
+                    restoreState();
                 }
+
             }
         });
         animator1.start();
@@ -689,13 +705,20 @@ public class YMOptionalPullView extends LinearLayout {
         ValueAnimator animator1 = new ValueAnimator();
         animator1.setFloatValues(criticalValue, 0);
         animator1.setDuration((int) (criticalValue * 1.5));
-        animator1.setStartDelay(100);
+        animator1.setStartDelay(completeLoadShowDelay);
         animator1.setInterpolator(new DecelerateInterpolator(3));
         animator1.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 float value = (float) animation.getAnimatedValue();
                 changeViewHeight(value, false);
+            }
+        });
+        animator1.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                restoreState();
             }
         });
         animator1.start();
