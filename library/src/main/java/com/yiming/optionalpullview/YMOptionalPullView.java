@@ -108,8 +108,10 @@ public class YMOptionalPullView extends LinearLayout {
      * 加载完成时调用
      */
     public void notifyLoadComplete(boolean succeed) {
-        appearLoadComplete(succeed);
-        completeLoad();
+        if(isLoading) {
+            appearLoadComplete(succeed);
+            completeLoad();
+        }
     }
 
     public void setContentViewLocator(ContentViewLocator locator) {
@@ -393,6 +395,7 @@ public class YMOptionalPullView extends LinearLayout {
     private float overflowYIncrement;
     private float gap;
     private float density;
+    private boolean isLoading;
 
     public static enum Mode {
         UP_PULL,
@@ -499,6 +502,7 @@ public class YMOptionalPullView extends LinearLayout {
      * 正在加载时展示样式
      */
     private void appearLoadingState() {
+        isLoading = true;
         mViewBuilder.appearLoadingState(transformViewIsDownPull);
         if (mOnPullListener != null) {
             mOnPullListener.onLoad(YMOptionalPullView.this, transformViewIsDownPull);
@@ -566,12 +570,14 @@ public class YMOptionalPullView extends LinearLayout {
             overflowY = Math.abs(gap);
             Log.d(debug_tag, "onIntercept(Move) 拦截了，开始下拉");
             transformViewIsDownPull = true;
+            isLoading = false;
             setGravity(Gravity.TOP);
             return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
         } else if(gap < -mTouchSlop && isMostBottom && (mMode == Mode.BOTH_PULL || mMode == Mode.UP_PULL) && !upPullDisabled) {
             overflowY = Math.abs(gap);
             Log.d(debug_tag, "onIntercept(Move) 拦截了,开始上拉");
             transformViewIsDownPull = false;
+            isLoading = false;
             setGravity(Gravity.BOTTOM);
             return true;//已经到达最上或最下，拦截事件传递,转入onTouchEvent()
         }
@@ -722,6 +728,7 @@ public class YMOptionalPullView extends LinearLayout {
             }
         });
         animator1.start();
+        isLoading = false;
     }
 
     /**
