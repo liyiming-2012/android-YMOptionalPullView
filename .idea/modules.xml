@@ -3,8 +3,11 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/YMOptionalPullView.iml" filepath="$PROJECT_DIR$/YMOptionalPullView.iml" />
+      <module fileurl="file://E:\android\AndroidStudioProjects\YMOptionalPullView\YMOptionalPullView.iml" filepath="E:\android\AndroidStudioProjects\YMOptionalPullView\YMOptionalPullView.iml" />
+      <module fileurl="file://E:\android\AndroidStudioProjects\YMOptionalPullView\sample\app.iml" filepath="E:\android\AndroidStudioProjects\YMOptionalPullView\sample\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/library/library.iml" filepath="$PROJECT_DIR$/library/library.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sample/app.iml" filepath="$PROJECT_DIR$/sample/app.iml" />
+      <module fileurl="file://E:\android\AndroidStudioProjects\YMOptionalPullView\library\library.iml" filepath="E:\android\AndroidStudioProjects\YMOptionalPullView\library\library.iml" />
+      <module fileurl="file://$PROJECT_DIR$/sample/sample.iml" filepath="$PROJECT_DIR$/sample/sample.iml" />
     </modules>
   </component>
 </project>
